@@ -11,6 +11,18 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 
+const publicSupabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  }
+);
+
 const state = {
   step: 1, type: "", businessName: "", description: "",
   features: [], video: "", budget: "", launch: ""
@@ -219,16 +231,13 @@ form.addEventListener("submit", async e => {
     budget: state.budget,
     launch_timeline: state.launch,
 
-    notes: data.notes || data.message || data.anythingElse || "",
-
-    status: "new",
-    source: "website"
+    notes: data.notes || data.message || data.anythingElse || ""
   };
 
   console.log("Sending project enquiry:", enquiry);
 
   try {
-    const { error } = await supabaseClient
+    const { error } = await publicSupabaseClient
       .from("project_enquiries")
       .insert([enquiry]);
 
