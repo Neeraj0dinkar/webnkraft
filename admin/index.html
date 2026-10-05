@@ -81,7 +81,7 @@
 
     async function checkExistingSession() {
       const { data } = await supabaseClient.auth.getUser();
-      if (data?.user) window.location.href = "dashboard.html";
+      if (data?.user) window.location.href = "/admin/dashboard.html";
     }
 
     form.addEventListener("submit", async event => {
@@ -98,7 +98,7 @@
 
         if (error) throw error;
         showMessage("Sign-in successful. Opening dashboard...", "success");
-        window.location.href = "dashboard.html";
+        window.location.href = "/admin/dashboard.html";
       } catch (error) {
         console.error("Admin login failed:", error);
         showMessage(error?.message || "Unable to sign in. Please check your credentials.", "error");
