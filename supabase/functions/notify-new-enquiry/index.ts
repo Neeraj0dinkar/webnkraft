@@ -102,6 +102,70 @@ Deno.serve(async (req) => {
       );
     }
 
+        let customerEmailId = null;
+
+    if (enquiry.email) {
+      const customerResponse = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from: "webnKraft <onboarding@resend.dev>",
+          to: [enquiry.email],
+          subject: "Thank you for contacting webnKraft",
+          html: `
+            <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#172033;max-width:720px;margin:auto">
+              <h2 style="margin-bottom:4px">Thank you for contacting webnKraft</h2>
+
+              <p style="color:#667085;margin-top:0">
+                Hi ${name},
+              </p>
+
+              <p>
+                Thank you for sharing your project requirements with webnKraft.
+                We have received your enquiry successfully.
+              </p>
+
+              <p>
+                Our team will review your requirements and get back to you
+                shortly to discuss the next steps.
+              </p>
+
+              <h3>Your enquiry</h3>
+
+              <p>
+                <strong>Business:</strong> ${businessName}<br>
+                <strong>Project:</strong> ${projectType}<br>
+                <strong>Budget:</strong> ${budget}<br>
+                <strong>Launch:</strong> ${launch}
+              </p>
+
+              <p>
+                We appreciate your interest in webnKraft and look forward
+                to learning more about your project.
+              </p>
+
+              <p>
+                Regards,<br>
+                <strong>webnKraft Team</strong>
+              </p>
+            </div>
+          `
+        })
+      });
+
+      const customerResult = await customerResponse.json();
+
+      if (!customerResponse.ok) {
+        console.error("Customer acknowledgement email failed:", customerResult);
+      } else {
+        customerEmailId = customerResult?.id || null;
+        console.log("Customer acknowledgement email sent:", customerEmailId);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

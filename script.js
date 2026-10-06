@@ -237,48 +237,76 @@ form.addEventListener("submit", async e => {
   console.log("Sending project enquiry:", enquiry);
 
   try {
-    const { error } = await publicSupabaseClient
-      .from("project_enquiries")
-      .insert([enquiry]);
+    const turnstileResponse =
+      document.querySelector(
+        'input[name="cf-turnstile-response"]'
+      )?.value;
 
-    if (error) {
-      console.error("Supabase error:", error);
-      throw error;
+    if (!turnstileResponse) {
+      status.textContent =
+        "Please complete the security verification and try again.";
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit enquiry";
+
+      return;
     }
 
-    // Notify the webnKraft team after the enquiry has been saved.
-    // Email failure should not make the customer think the enquiry was lost.
-    const { data: notificationData, error: notificationError } =
-      await supabaseClient.functions.invoke("notify-new-enquiry", {
-        body: { enquiry }
-      });
+    const response = await fetch(
+      "https://pcqnjersuxikgygemuef.supabase.co/functions/v1/notify-new-enquiry",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          enquiry,
+          turnstileToken: turnstileResponse
+        })
+      }
+    );
 
-    if (notificationError) {
-      console.error("Enquiry notification failed:", notificationError);
-    } else {
-      console.log("webnKraft enquiry notification sent:", notificationData);
+    const result = await response.json();
+
+    console.log("Edge Function response:", result);
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error || "Enquiry submission failed"
+      );
     }
-
-    console.log("Enquiry successfully saved:", enquiry);
 
     status.textContent =
       "Thank you! Your project enquiry has been submitted successfully. We'll review it and get back to you.";
 
-    submitBtn.textContent = "Enquiry submitted ✓";
+    submitBtn.textContent =
+      "Enquiry submitted ✓";
+
     submitBtn.disabled = true;
 
   } catch (error) {
 
-    console.error("Project enquiry submission failed:", error);
+    console.error(
+      "Project enquiry submission failed:",
+      error
+    );
 
     status.textContent =
       "We couldn't submit your enquiry right now. Please try again.";
 
-    submitBtn.textContent = "Submit enquiry";
+    submitBtn.textContent =
+      "Submit enquiry";
+
     submitBtn.disabled = false;
+
+    if (
+      typeof turnstile !== "undefined" &&
+      typeof turnstile.reset === "function"
+    ) {
+      turnstile.reset();
+    }
   }
 });
-
 document.querySelectorAll("[data-service]").forEach(link => {
   link.addEventListener("click", () => {
     const service = link.dataset.service;

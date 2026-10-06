@@ -62,6 +62,11 @@
     ]
   }
   </script>
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+  ></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -332,9 +337,16 @@
               <label>Email<input name="email" type="email" placeholder="you@example.com" required></label>
               <label>Anything else we should know?<textarea name="notes" rows="3" placeholder="Timeline, examples you like, integrations, etc."></textarea></label>
               <div class="summary" id="projectSummary"></div>
-            </div>
 
-            <div class="builder-actions">
+              <div
+                class="cf-turnstile"
+                data-sitekey="0x4AAAAAAFOY3n9iPYd4ErAi"
+                data-theme="light"
+                data-size="normal"
+              ></div>
+              </div>
+
+              <div class="builder-actions">
               <button type="button" class="btn btn-secondary" id="backBtn" hidden>← Back</button>
               <button type="button" class="btn btn-primary" id="nextBtn">Continue →</button>
               <button type="submit" class="btn btn-primary" id="submitBtn" hidden>Send project enquiry ✓</button>
